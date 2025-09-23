@@ -81,10 +81,6 @@ class Contrato(db.Model):
         "Pago", back_populates="contrato", cascade="all, delete-orphan"
     )
 
-    pagos = relationship(
-        "Pago", back_populates="contrato", cascade="all, delete-orphan"
-    )
-
 
 class Pago(db.Model):
     __tablename__ = "pagos"
@@ -265,15 +261,15 @@ def propiedad_editar(propiedad_id):
     propiedad_a_editar = Propiedad.query.get_or_404(propiedad_id)
 
     if request.method == "POST":
-        propiedad_a_editar.nombre_casa = (request.form.get("nombre_casa"),)
-        propiedad_a_editar.direccion = (request.form.get("direccion"),)
-        propiedad_a_editar.ciudad = (request.form.get("ciudad"),)
-        propiedad_a_editar.descripcion = (request.form.get("descripcion"),)
-        propiedad_a_editar.tipo_propiedad = (request.form.get("tipo_propiedad"),)
-        propiedad_a_editar.precio_renta_base = (
-            Decimal(request.form.get("precio_renta_base")),
+        propiedad_a_editar.nombre_casa = request.form.get("nombre_casa")
+        propiedad_a_editar.direccion = request.form.get("direccion")
+        propiedad_a_editar.ciudad = request.form.get("ciudad")
+        propiedad_a_editar.descripcion = request.form.get("descripcion")
+        propiedad_a_editar.tipo_propiedad = request.form.get("tipo_propiedad")
+        propiedad_a_editar.precio_renta_base = Decimal(
+            request.form.get("precio_renta_base")
         )
-        propiedad_a_editar.estado = (request.form.get("estado"),)
+        propiedad_a_editar.estado = request.form.get("estado")
 
         fecha_disponible_str = request.form.get("fecha_disponible")
         propiedad_a_editar.fecha_disponible = (
