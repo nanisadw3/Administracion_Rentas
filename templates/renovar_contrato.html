@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Renovar Contrato{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Gestión de Renovación de Contrato</h2>
+    <div class="card">
+        <div class="card-header">
+            Contrato para la propiedad en {{ contrato.propiedad.direccion }}
+        </div>
+        <div class="card-body">
+            <p><strong>Fecha de Finalización:</strong> {{ contrato.fecha_fin.strftime('%d-%m-%Y') }}</p>
+            <p>Por favor, indícanos si deseas renovar tu contrato y añade cualquier comentario.</p>
+            <form action="{{ url_for('renovar_contrato', contrato_id=contrato.id) }}" method="POST">
+                <div class="mb-3">
+                    <label for="intencion_renovar" class="form-label">¿Deseas renovar el contrato?</label>
+                    <select class="form-select" id="intencion_renovar" name="intencion_renovar" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="si" {% if contrato.intencion_renovar == True %}selected{% endif %}>Sí</option>
+                        <option value="no" {% if contrato.intencion_renovar == False %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="comentario_renovacion" class="form-label">Comentarios (opcional):</label>
+                    <textarea class="form-control" id="comentario_renovacion" name="comentario_renovacion" rows="3">{{ contrato.comentario_renovacion if contrato.comentario_renovacion is not none else '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Intención de Renovación</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

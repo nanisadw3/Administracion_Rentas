@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Editar Propiedad{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Editando Propiedad: {{ propiedad.direccion }}</h2>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="nombre_casa" class="form-label">Nombre de la Casa/Edificio:</label>
+                        <input type="text" id="nombre_casa" name="nombre_casa" class="form-control" value="{{ propiedad.nombre_casa or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección:</label>
+                        <input type="text" id="direccion" name="direccion" class="form-control" value="{{ propiedad.direccion }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ciudad" class="form-label">Ciudad:</label>
+                        <input type="text" id="ciudad" name="ciudad" class="form-control" value="{{ propiedad.ciudad or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción:</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control" rows="3">{{ propiedad.descripcion or '' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo_propiedad" class="form-label">Tipo de Propiedad (ej: Departamento, Casa):</label>
+                        <input type="text" id="tipo_propiedad" name="tipo_propiedad" class="form-control" value="{{ propiedad.tipo_propiedad or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="precio_renta_base" class="form-label">Precio de Renta Base:</label>
+                        <input type="number" step="0.01" id="precio_renta_base" name="precio_renta_base" class="form-control" value="{{ propiedad.precio_renta_base }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado:</label>
+                        <select id="estado" name="estado" class="form-select" required>
+                            <option value="disponible" {% if propiedad.estado == 'disponible' %}selected{% endif %}>Disponible</option>
+                            <option value="rentada" {% if propiedad.estado == 'rentada' %}selected{% endif %}>Rentada</option>
+                            <option value="en_mantenimiento" {% if propiedad.estado == 'en_mantenimiento' %}selected{% endif %}>En Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fecha_disponible" class="form-label">Fecha de Disponibilidad:</label>
+                        <input type="date" id="fecha_disponible" name="fecha_disponible" class="form-control" value="{{ propiedad.fecha_disponible.strftime('%Y-%m-%d') if propiedad.fecha_disponible else '' }}">
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        <a href="{{ url_for('propiedad_detalle', propiedad_id=propiedad.id) }}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

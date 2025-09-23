@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Registrar Pago{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Registrar Pago</h2>
+                <p class="text-muted text-center">
+                    <strong>Propiedad:</strong> {{ contrato.propiedad.direccion }}<br>
+                    <strong>Inquilino:</strong> {{ contrato.inquilino.nombre_completo }}<br>
+                    <strong>Mes a Pagar:</strong> {{ mes_nombre }}
+                </p>
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="monto_pagado" class="form-label">Monto Pagado:</label>
+                        <input type="number" step="0.01" id="monto_pagado" name="monto_pagado" class="form-control" required value="{{ "%.2f"|format(contrato.monto_renta_mensual) }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="fecha_pago" class="form-label">Fecha de Pago:</label>
+                        <input type="date" id="fecha_pago" name="fecha_pago" class="form-control" required value="{{ today }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="metodo_pago" class="form-label">Método de Pago:</label>
+                        <select name="metodo_pago" id="metodo_pago" class="form-select">
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Confirmar Pago</button>
+                        <a href="{{ url_for('propiedad_detalle', propiedad_id=contrato.propiedad_id) }}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

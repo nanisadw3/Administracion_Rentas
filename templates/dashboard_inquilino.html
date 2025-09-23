@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Panel de Inquilino{% endblock %}
+{% block content %}
+    <h2 class="mb-4">Panel de Inquilino</h2>
+
+    {% if contrato and num_pagos_actual >= 8 and contrato.intencion_renovar is none %}
+    <div class="card border-warning mb-4">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0">¡Atención! Solicitud de Renovación de Contrato</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text">Tu contrato para la propiedad en {{ contrato.propiedad.direccion }} ha llegado a su octavo pago. Por favor, indícanos si deseas renovar:</p>
+            <a href="{{ url_for('renovar_contrato', contrato_id=contrato.id) }}" class="btn btn-primary">Gestionar Renovación</a>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Contrato Actual #}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Detalles de tu Contrato Actual</h5>
+        </div>
+        <div class="card-body">
+            {% if contrato %}
+                <p><strong>Propiedad:</strong> <a href="{{ url_for('propiedad_detalle', propiedad_id=contrato.propiedad.id) }}">{{ contrato.propiedad.direccion }}</a></p>
+                <p><strong>Monto de Renta Mensual:</strong> ${{ "%.2f"|format(contrato.monto_renta_mensual) }}</p>
+                <p><strong>Estado:</strong> <span class="badge bg-success">{{ contrato.estado_contrato.capitalize() }}</span></p>
+                <p><strong>Inicio:</strong> {{ contrato.fecha_inicio.strftime('%d-%m-%Y') }}</p>
+                <p><strong>Fin:</strong> {{ contrato.fecha_fin.strftime('%d-%m-%Y') }}</p>
+            {% else %}
+                <p class="card-text">No tienes ningún contrato de alquiler activo en este momento.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Historial de Pagos #}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Historial de Pagos</h5>
+        </div>
+        <div class="card-body">
+            {% if pagos %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha de Pago</th>
+                                <th>Mes Correspondiente</th>
+                                <th class="text-end">Monto Pagado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pago in pagos %}
+                            <tr>
+                                <td>{{ pago.fecha_pago.strftime('%d-%m-%Y') }}</td>
+                                <td>{{ pago.mes_correspondiente }}</td>
+                                <td class="text-end">${{ "%.2f"|format(pago.monto_pagado) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="card-text">Aún no has realizado ningún pago para este contrato.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Historial de Contratos Anteriores #}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Historial de Contratos Anteriores</h5>
+        </div>
+        <div class="card-body">
+            {% if contratos_inactivos %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Propiedad</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Monto Mensual</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in contratos_inactivos %}
+                            <tr>
+                                <td><a href="{{ url_for('propiedad_detalle', propiedad_id=c.propiedad.id) }}">{{ c.propiedad.direccion }}</a></td>
+                                <td>{{ c.fecha_inicio.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ c.fecha_fin.strftime('%d/%m/%Y') }}</td>
+                                <td>${{ "%.2f"|format(c.monto_renta_mensual) }}</td>
+                                <td><span class="badge bg-secondary">{{ c.estado_contrato.capitalize() }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="card-text">No tienes contratos anteriores.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
