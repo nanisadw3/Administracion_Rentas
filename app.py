@@ -13,20 +13,13 @@ app.secret_key = os.environ.get("SECRET_KEY", "tu_clave_secreta_muy_dificil_de_a
 
 # Conexión a la base de datos PostgreSQL
 # Lee la URL de la base de datos desde la variable de entorno DATABASE_URL.
-# Esto es estándar en plataformas como Railway y Heroku.
 db_url = os.environ.get("DATABASE_URL")
 if not db_url:
-    # Fallback para desarrollo local si DATABASE_URL no está configurada
-    # Si corres localmente, asegúrate de que estas credenciales son correctas.
-    print("ADVERTENCIA: DATABASE_URL no encontrada. Usando credenciales locales.")
-    db_user = "postgres"
-    db_pass = "usUegONwWMqTBaJFsbShELFArhkICbjT"
-    db_host = "interchange.proxy.rlwy.net"
-    db_port = "25545"
-    db_name = "railway"
-    db_url = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+    # Levanta un error si la variable no está en el entorno de Heroku
+    raise RuntimeError("DATABASE_URL variable de entorno no configurada.")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+# Asignación de la URL de DigitalOcean
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
@@ -672,4 +665,3 @@ def create_admin():
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
-
