@@ -126,6 +126,13 @@ def sync_all_properties_states():
     db.session.commit()
 
 
+def calcular_duracion_meses(start, end):
+    diff_months = (end.year - start.year) * 12 + end.month - start.month
+    if end.day >= start.day:
+        return max(diff_months + 1, 1)
+    return max(diff_months, 1)
+
+
 # --- Panel de Control ---
 @app.route("/")
 def dashboard():
@@ -352,7 +359,8 @@ def propiedad_detalle(propiedad_id):
 
         pagos_realizados = {pago.mes_correspondiente for pago in contrato_activo.pagos}
         start_date = contrato_activo.fecha_inicio
-        for i in range(12):
+        duracion_contrato = calcular_duracion_meses(start_date, contrato_activo.fecha_fin)
+        for i in range(duracion_contrato):
             current_year = start_date.year + (start_date.month + i - 1) // 12
             current_month = (start_date.month + i - 1) % 12 + 1
 
@@ -571,14 +579,15 @@ def registrar_pago(contrato_id):
         db.session.commit()
         flash(f"Pago para {mes_nombre} registrado exitosamente.", "success")
 
-        # Comprobar si es el 8º pago para solicitar intención de renovación
+        # Comprobar si es el momento de solicitar intención de renovación (ej: a 4 meses de finalizar el contrato)
+        duracion_contrato = calcular_duracion_meses(contrato.fecha_inicio, contrato.fecha_fin)
+        mes_renovacion = max(duracion_contrato - 4, 1)
         num_pagos_actual = Pago.query.filter_by(contrato_id=contrato.id).count()
-        if num_pagos_actual == 8 and contrato.intencion_renovar is None:
+        if num_pagos_actual == mes_renovacion and contrato.intencion_renovar is None:
             flash("Se ha solicitado la intención de renovación al inquilino.", "info")
 
         # Comprobar si es el último pago
-        num_pagos = Pago.query.filter_by(contrato_id=contrato.id).count()
-        if num_pagos >= 12:
+        if num_pagos_actual >= duracion_contrato:
             contrato.estado_contrato = "finalizado"
             contrato.propiedad.estado = "disponible"
             db.session.commit()
