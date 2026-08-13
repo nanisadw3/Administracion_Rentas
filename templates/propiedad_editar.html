@@ -33,11 +33,21 @@
                     </div>
                     <div class="mb-3">
                         <label for="estado" class="form-label">Estado:</label>
-                        <select id="estado" name="estado" class="form-select" required>
-                            <option value="disponible" {% if propiedad.estado == 'disponible' %}selected{% endif %}>Disponible</option>
-                            <option value="rentada" {% if propiedad.estado == 'rentada' %}selected{% endif %}>Rentada</option>
-                            <option value="en_mantenimiento" {% if propiedad.estado == 'en_mantenimiento' %}selected{% endif %}>En Mantenimiento</option>
-                        </select>
+                        {% if tiene_contrato_activo %}
+                            <select id="estado" name="estado" class="form-select bg-body-secondary text-secondary-emphasis" disabled>
+                                <option value="rentada" selected>Rentada</option>
+                            </select>
+                            <input type="hidden" name="estado" value="rentada">
+                            <div class="form-text text-warning mt-2">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Esta propiedad tiene un contrato activo, por lo que su estado está fijado como <strong>Rentada</strong>.
+                            </div>
+                        {% else %}
+                            <select id="estado" name="estado" class="form-select" required>
+                                <option value="disponible" {% if propiedad.estado == 'disponible' %}selected{% endif %}>Disponible</option>
+                                <option value="rentada" {% if propiedad.estado == 'rentada' %}selected{% endif %}>Rentada</option>
+                                <option value="en_mantenimiento" {% if propiedad.estado == 'en_mantenimiento' %}selected{% endif %}>En Mantenimiento</option>
+                            </select>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <label for="fecha_disponible" class="form-label">Fecha de Disponibilidad:</label>

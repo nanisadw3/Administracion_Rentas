@@ -112,6 +112,20 @@ def logout():
     return redirect(url_for("login"))
 
 
+# --- Helper Functions ---
+def sync_all_properties_states():
+    propiedades = Propiedad.query.all()
+    for prop in propiedades:
+        tiene_contrato_activo = Contrato.query.filter_by(propiedad_id=prop.id, estado_contrato="activo").first() is not None
+        if tiene_contrato_activo:
+            if prop.estado != "rentada":
+                prop.estado = "rentada"
+        else:
+            if prop.estado == "rentada":
+                prop.estado = "disponible"
+    db.session.commit()
+
+
 # --- Panel de Control ---
 @app.route("/")
 def dashboard():
@@ -119,6 +133,7 @@ def dashboard():
         return redirect(url_for("login"))
     user_role = session["user_role"]
     if user_role == "administrador":
+        sync_all_properties_states()
         ganancias_mensuales = defaultdict(float)
         pagos_activos = (
             db.session.query(Pago)
@@ -252,6 +267,7 @@ def propiedad_editar(propiedad_id):
         return redirect(url_for("login"))
 
     propiedad_a_editar = Propiedad.query.get_or_404(propiedad_id)
+    tiene_contrato_activo = Contrato.query.filter_by(propiedad_id=propiedad_a_editar.id, estado_contrato="activo").first() is not None
 
     if request.method == "POST":
         propiedad_a_editar.nombre_casa = request.form.get("nombre_casa")
@@ -262,7 +278,11 @@ def propiedad_editar(propiedad_id):
         propiedad_a_editar.precio_renta_base = Decimal(
             request.form.get("precio_renta_base")
         )
-        propiedad_a_editar.estado = request.form.get("estado")
+        
+        if tiene_contrato_activo:
+            propiedad_a_editar.estado = "rentada"
+        else:
+            propiedad_a_editar.estado = request.form.get("estado")
 
         fecha_disponible_str = request.form.get("fecha_disponible")
         propiedad_a_editar.fecha_disponible = (
@@ -277,7 +297,7 @@ def propiedad_editar(propiedad_id):
             url_for("propiedad_detalle", propiedad_id=propiedad_a_editar.id)
         )
 
-    return render_template("propiedad_editar.html", propiedad=propiedad_a_editar)
+    return render_template("propiedad_editar.html", propiedad=propiedad_a_editar, tiene_contrato_activo=tiene_contrato_activo)
 
 
 @app.route("/propiedad/borrar/<int:propiedad_id>", methods=["POST"])

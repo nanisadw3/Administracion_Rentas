@@ -1,161 +1,299 @@
 {% extends "base.html" %}
 {% block title %}Panel de Administrador{% endblock %}
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Panel de Administrador</h2>
-    </div>
-
-    {# Resumen de Ganancias #}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Resumen de Ganancias Mensuales (Contratos Activos)</h5>
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="mb-0 text-body-emphasis"><i class="bi bi-speedometer2 text-primary me-2"></i>Panel de Administrador</h2>
+            <p class="text-secondary mb-0">Gestión global de propiedades, inquilinos y contratos.</p>
         </div>
-        <div class="card-body">
-            {% if ganancias %}
-                <div class="table-responsive">
-                    <table class="table table-sm table-borderless">
-                        <thead>
-                            <tr>
-                                <th>Mes</th>
-                                <th class="text-end">Total Recaudado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for mes, total in ganancias %}
-                            <tr>
-                                <td>{{ mes }}</td>
-                                <td class="text-end"><strong>${{ "%.2f"|format(total) }}</strong></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="card-text">Aún no se han registrado pagos en contratos activos.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    {# Listado de Propiedades #}
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Listado de Propiedades</h5>
-            <a href="{{ url_for('agregar_propiedad') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-circle me-1"></i> Agregar Propiedad
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <a href="{{ url_for('agregar_propiedad') }}" class="btn btn-primary me-2 shadow-sm">
+                <i class="bi bi-house-add me-1"></i> Nueva Propiedad
+            </a>
+            <a href="{{ url_for('agregar_inquilino') }}" class="btn btn-outline-primary shadow-sm">
+                <i class="bi bi-person-add me-1"></i> Nuevo Inquilino
             </a>
         </div>
-        <div class="card-body">
-            <p class="text-muted">Haz clic en una propiedad para ver los detalles.</p>
-            {% if propiedades %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre Casa</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for prop in propiedades %}
-                            <tr class="clickable-row" onclick="window.location='{{ url_for('propiedad_detalle', propiedad_id=prop.id) }}';">
-                                <td>{{ prop.id }}</td>
-                                <td>{{ prop.nombre_casa or 'N/A' }}</td>
-                                <td><span class="badge bg-{{ 'success' if prop.estado == 'disponible' else ('warning' if prop.estado == 'en_mantenimiento' else 'info') }}">{{ prop.estado.capitalize() }}</span></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    </div>
+
+    {# Tarjetas de Estadísticas Rápidas #}
+    <div class="row g-3 mb-4">
+        {% set total_prop = propiedades|length %}
+        {% set rentadas = propiedades|selectattr('estado', 'equalto', 'rentada')|list|length %}
+        {% set disponibles = propiedades|selectattr('estado', 'equalto', 'disponible')|list|length %}
+        {% set mantenimiento = propiedades|selectattr('estado', 'equalto', 'en_mantenimiento')|list|length %}
+        
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 bg-body-tertiary">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width: 56px; height: 56px;">
+                        <i class="bi bi-houses fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle text-secondary mb-1">Propiedades</h6>
+                        <h3 class="card-title mb-0 fw-bold">{{ total_prop }}</h3>
+                    </div>
                 </div>
-            {% else %}
-                <p class="card-text">No hay propiedades registradas en la base de datos.</p>
-            {% endif %}
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 bg-body-tertiary">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width: 56px; height: 56px;">
+                        <i class="bi bi-house-check fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle text-secondary mb-1">Rentadas</h6>
+                        <h3 class="card-title mb-0 fw-bold">{{ rentadas }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 bg-body-tertiary">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width: 56px; height: 56px;">
+                        <i class="bi bi-house-heart fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle text-secondary mb-1">Disponibles</h6>
+                        <h3 class="card-title mb-0 fw-bold">{{ disponibles }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 bg-body-tertiary">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width: 56px; height: 56px;">
+                        <i class="bi bi-tools fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle text-secondary mb-1">Mantenimiento</h6>
+                        <h3 class="card-title mb-0 fw-bold">{{ mantenimiento }}</h3>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    {# Listado de Inquilinos #}
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Listado de Inquilinos</h5>
-            <a href="{{ url_for('agregar_inquilino') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-person-plus me-1"></i> Agregar Inquilino
-            </a>
-        </div>
-        <div class="card-body">
-            {% if inquilinos %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Nombre Completo</th>
-                                <th>Contrato Activo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in inquilinos %}
-                            <tr class="clickable-row" onclick="window.location='{{ url_for('inquilino_detalle', user_id=user.id) }}';">
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.nombre_completo }}</td>
-                                <td>
-                                    {% set active_contract = user.contratos|selectattr('estado_contrato', 'equalto', 'activo')|first %}
-                                    {% if active_contract %}
-                                        <span class="badge bg-success">Activo</span>
-                                    {% else %}
-                                        <span class="badge bg-danger">Inactivo</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="row g-4">
+        {# Sección Izquierda: Propiedades e Inquilinos #}
+        <div class="col-lg-8">
+            {# Listado de Propiedades #}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+                        <h5 class="card-title mb-0 fw-semibold"><i class="bi bi-houses-fill text-primary me-2"></i>Propiedades</h5>
+                        <div class="input-group input-group-sm w-auto">
+                            <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                            <input type="text" id="search-propiedades" class="form-control border-start-0" placeholder="Buscar propiedad..." style="max-width: 200px;">
+                        </div>
+                    </div>
+                    
+                    {% if propiedades %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="table-propiedades">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre Casa / Edificio</th>
+                                        <th>Tipo</th>
+                                        <th>Precio Renta Base</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prop in propiedades %}
+                                    <tr class="clickable-row" onclick="window.location='{{ url_for('propiedad_detalle', propiedad_id=prop.id) }}';">
+                                        <td class="text-secondary fw-semibold">#{{ prop.id }}</td>
+                                        <td>
+                                            <div class="fw-bold">{{ prop.nombre_casa or 'Sin Nombre' }}</div>
+                                            <small class="text-secondary d-block text-truncate" style="max-width: 250px;">{{ prop.direccion }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ prop.tipo_propiedad or 'N/A' }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-success">${{ "%.2f"|format(prop.precio_renta_base) }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if prop.estado == 'disponible' %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Disponible</span>
+                                            {% elif prop.estado == 'en_mantenimiento' %}
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3">Mantenimiento</span>
+                                            {% else %}
+                                                <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">Rentada</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-house-exclamation text-secondary fs-1 d-block mb-2"></i>
+                            <p class="text-secondary mb-0">No hay propiedades registradas en la base de datos.</p>
+                        </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p class="card-text">No hay inquilinos registrados.</p>
-            {% endif %}
-        </div>
-    </div>
+            </div>
 
-    {# Gestión de Administradores #}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Gestión de Administradores</h5>
+            {# Listado de Inquilinos #}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+                        <h5 class="card-title mb-0 fw-semibold"><i class="bi bi-people-fill text-primary me-2"></i>Inquilinos</h5>
+                        <div class="input-group input-group-sm w-auto">
+                            <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                            <input type="text" id="search-inquilinos" class="form-control border-start-0" placeholder="Buscar inquilino..." style="max-width: 200px;">
+                        </div>
+                    </div>
+                    
+                    {% if inquilinos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="table-inquilinos">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Contacto</th>
+                                        <th class="text-center">Contrato Activo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in inquilinos %}
+                                    <tr class="clickable-row" onclick="window.location='{{ url_for('inquilino_detalle', user_id=user.id) }}';">
+                                        <td class="fw-bold text-primary">@{{ user.username }}</td>
+                                        <td>{{ user.nombre_completo }}</td>
+                                        <td>
+                                            <div class="small"><i class="bi bi-envelope me-1 text-secondary"></i>{{ user.email }}</div>
+                                            {% if user.telefono %}
+                                                <div class="small text-secondary"><i class="bi bi-telephone me-1"></i>{{ user.telefono }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% set active_contract = user.contratos|selectattr('estado_contrato', 'equalto', 'activo')|first %}
+                                            {% if active_contract %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3">Sin Contrato</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-people text-secondary fs-1 d-block mb-2"></i>
+                            <p class="text-secondary mb-0">No hay inquilinos registrados.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            {% if administradores %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Nombre Completo</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+
+        {# Sección Derecha: Ganancias y Administradores #}
+        <div class="col-lg-4">
+            {# Resumen de Ganancias #}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <h5 class="card-title mb-0 fw-semibold"><i class="bi bi-cash-coin text-success me-2"></i>Ganancias Mensuales</h5>
+                </div>
+                <div class="card-body">
+                    {% if ganancias %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                                <thead>
+                                    <tr class="text-secondary">
+                                        <th>Mes</th>
+                                        <th class="text-end">Recaudado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mes, total in ganancias %}
+                                    <tr class="border-bottom border-light-subtle">
+                                        <td class="py-2 fw-semibold text-secondary-emphasis">{{ mes }}</td>
+                                        <td class="text-end py-2 text-success-emphasis fw-bold">${{ "%.2f"|format(total) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="bi bi-cash text-secondary fs-2 d-block mb-1"></i>
+                            <p class="text-secondary small mb-0">Aún no se han registrado pagos en contratos activos.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Gestión de Administradores #}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                    <h5 class="card-title mb-0 fw-semibold"><i class="bi bi-shield-lock text-warning me-2"></i>Administradores</h5>
+                </div>
+                <div class="card-body">
+                    {% if administradores %}
+                        <div class="list-group list-group-flush">
                             {% for admin in administradores %}
-                            <tr>
-                                <td>{{ admin.id }}</td>
-                                <td>{{ admin.username }}</td>
-                                <td>{{ admin.nombre_completo }}</td>
-                                <td>
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-bottom border-light-subtle bg-transparent">
+                                <div>
+                                    <div class="fw-bold small">{{ admin.nombre_completo }}</div>
+                                    <small class="text-secondary">@{{ admin.username }}</small>
+                                </div>
+                                <div>
                                     {% if session['user_id'] != admin.id %}
-                                        <a href="{{ url_for('restablecer_password_admin', user_id=admin.id) }}" class="btn btn-warning btn-sm">
-                                            <i class="bi bi-key me-1"></i> Restablecer Contraseña
+                                        <a href="{{ url_for('restablecer_password_admin', user_id=admin.id) }}" class="btn btn-light btn-sm border" title="Restablecer Contraseña">
+                                            <i class="bi bi-key"></i>
                                         </a>
                                     {% else %}
-                                        <span class="text-muted">(Usuario actual)</span>
+                                        <span class="badge bg-secondary-subtle text-secondary small">Tú</span>
                                     {% endif %}
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </div>
+                    {% else %}
+                        <p class="text-secondary small text-center mb-0">No hay otros administradores.</p>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p class="card-text">No hay otros administradores.</p>
-            {% endif %}
+            </div>
         </div>
     </div>
+
+    {# JavaScript para Filtros de Búsqueda Instantánea #}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Filtro para Propiedades
+            const searchProp = document.getElementById('search-propiedades');
+            if (searchProp) {
+                searchProp.addEventListener('keyup', function() {
+                    const value = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#table-propiedades tbody tr');
+                    rows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        row.style.display = text.includes(value) ? '' : 'none';
+                    });
+                });
+            }
+
+            // Filtro para Inquilinos
+            const searchInq = document.getElementById('search-inquilinos');
+            if (searchInq) {
+                searchInq.addEventListener('keyup', function() {
+                    const value = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#table-inquilinos tbody tr');
+                    rows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        row.style.display = text.includes(value) ? '' : 'none';
+                    });
+                });
+            }
+        });
+    </script>
 {% endblock %}
